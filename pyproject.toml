@@ -1,0 +1,49 @@
+[tool.poetry]
+name = "braumchat-api"
+version = "0.1.0"
+description = "Braumchat — realtime chat API (FastAPI, SQLAlchemy, Redis)"
+authors = ["Matheus Thomaz Braum <mtbraum@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+fastapi = "^0.100.0"
+uvicorn = { extras = ["standard"], version = "^0.22.0" }
+
+SQLAlchemy = "^2.0.20"
+asyncpg = "^0.27.0"
+psycopg = { extras = ["binary"], version = "^3.2.0" }
+
+
+python-dotenv = "^1.0.0"
+pydantic = "^1.10.11"
+
+python-jose = "^3.3.0"
+passlib = "^1.7.4"
+bcrypt = "^3.2.0"
+
+aioredis = "^2.0.1"
+
+httpx = "^0.25.0"
+
+greenlet = "^3.2.4"
+email-validator = "^2.3.0"
+python-multipart = "^0.0.20"
+
+[tool.poetry.group.dev.dependencies]
+alembic = "^1.11.1"
+pytest = "^7.4.0"
+pytest-asyncio = "^0.21.0"
+httpx = { version = "^0.25.0", extras = ["http2"] }
+black = "^24.1.0"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = ["tests"]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

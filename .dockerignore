@@ -1,0 +1,11 @@
+__pycache__
+*.pyc
+.env
+.env.*
+/.venv
+/dist
+/build
+.pytest_cache
+
+# poetry cache
+**/.mypy_cache
