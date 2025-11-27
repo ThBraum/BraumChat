@@ -55,33 +55,9 @@ if [ "${MIGRATE_ON_START,,}" != "false" ]; then
     done
 
     echo
-    echo "Postgres is ready — attempting to acquire advisory lock ${ADVISORY_LOCK_KEY} to run migrations..."
-
-    lock_start=$(date +%s)
-    got_lock=false
-    while true; do
-        res=$(psql -h "$HOST" -p "$PORT" -U "$DB_USER" -d "$DB_NAME" -tA -c "SELECT pg_try_advisory_lock(${ADVISORY_LOCK_KEY});" 2>/dev/null || echo f)
-        if [ "$res" = "t" ]; then
-            got_lock=true
-            break
-        fi
-        printf '#'
-        sleep 1
-        now=$(date +%s)
-        if [ $((now - lock_start)) -ge ${MIGRATE_LOCK_TIMEOUT} ]; then
-            echo
-            echo "Timed out waiting to acquire advisory lock after ${MIGRATE_LOCK_TIMEOUT}s"
-            exit 1
-        fi
-    done
-
-    if [ "$got_lock" = true ]; then
-        echo
-        echo "Advisory lock acquired — running migrations (only this instance will run them)"
-        alembic upgrade head
-        echo "Migrations finished — releasing advisory lock"
-        psql -h "$HOST" -p "$PORT" -U "$DB_USER" -d "$DB_NAME" -c "SELECT pg_advisory_unlock(${ADVISORY_LOCK_KEY});" >/dev/null || true
-    fi
+    echo "Postgres is ready — running migrations..."
+    alembic upgrade head
+    echo "Migrations finished."
 else
     echo "MIGRATE_ON_START is false — skipping migrations."
 fi
