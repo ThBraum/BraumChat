@@ -1,18 +1,19 @@
-from logging.config import fileConfig
+import asyncio
 import os
 import sys
-import asyncio
+import time
+from logging.config import fileConfig
+
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import create_async_engine
 
 from alembic import context
-from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy import text
-import time
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+import braumchat_api.models  # noqa: F401
 from braumchat_api.config import get_settings  # type: ignore
 from braumchat_api.models.meta import Base  # type: ignore
-import braumchat_api.models  # noqa: F401
 
 config = context.config
 
@@ -50,7 +51,9 @@ def run_migrations_online() -> None:
 
             while True:
                 try:
-                    res = await connection.execute(text("SELECT pg_try_advisory_lock(:k)"), {"k": lock_key})
+                    res = await connection.execute(
+                        text("SELECT pg_try_advisory_lock(:k)"), {"k": lock_key}
+                    )
                     got = res.scalar()
                 except Exception:
                     got = False
@@ -65,7 +68,9 @@ def run_migrations_online() -> None:
                 await connection.run_sync(do_run_migrations)
             finally:
                 try:
-                    await connection.execute(text("SELECT pg_advisory_unlock(:k)"), {"k": lock_key})
+                    await connection.execute(
+                        text("SELECT pg_advisory_unlock(:k)"), {"k": lock_key}
+                    )
                 except Exception:
                     pass
 
