@@ -14,7 +14,7 @@ else
     DB_USER=${DB_USER:-braumchat}
     DB_PASSWORD=${DB_PASSWORD:-password}
     DB_NAME=${DB_NAME:-braumchat}
-    export DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+    export DATABASE_URL="postgresql+asyncpg://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
 fi
 
 output=$(python - <<'PY'
