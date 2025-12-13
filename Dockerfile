@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     git \
     postgresql-client \
+    postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --no-cache-dir poetry==1.6.1
@@ -21,6 +22,9 @@ COPY pyproject.toml poetry.lock* /app/
 RUN poetry install --no-dev --no-root
 
 COPY . /app
+
+COPY scripts/wait-for-db-and-migrate.sh /usr/local/bin/wait-for-db-and-migrate.sh
+RUN chmod +x /usr/local/bin/wait-for-db-and-migrate.sh
 
 EXPOSE 8000
 

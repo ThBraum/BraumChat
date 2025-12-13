@@ -1,11 +1,11 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ...realtime.manager import manager
 from ...api.deps import get_db_dep
-from ...services.message_service import create_message
-from ...services import presence_service, direct_message_service
 from ...db.redis import redis as redis_client
+from ...realtime.manager import manager
+from ...services import direct_message_service, presence_service
+from ...services.message_service import create_message
 
 router = APIRouter()
 
