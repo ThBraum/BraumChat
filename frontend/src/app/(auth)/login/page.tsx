@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
+import { loginSchema } from "@/lib/validation";
 
 import { useAuth } from "@/components/providers/auth-provider";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
@@ -22,6 +23,8 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [emailError, setEmailError] = useState<string | null>(null);
+    const [passwordError, setPasswordError] = useState<string | null>(null);
 
     const highlights = t("auth:hero.highlights", {
         returnObjects: true,
@@ -40,6 +43,40 @@ export default function LoginPage() {
         e.preventDefault();
         setIsSubmitting(true);
         setError(null);
+        setEmailError(null);
+        setPasswordError(null);
+
+        // quick required-fields check
+        if (!email?.trim() || !password) {
+            setIsSubmitting(false);
+            if (!email?.trim() && !password) {
+                setError(t("auth:login.requiredFields") ?? "Email and password are required");
+                setEmailError(t("auth:login.emailRequired") ?? "Email required");
+                setPasswordError(t("auth:login.passwordRequired") ?? "Password required");
+                return;
+            }
+            if (!email?.trim()) {
+                setEmailError(t("auth:login.emailRequired") ?? "Email required");
+                setError(t("auth:login.emailRequired") ?? "Email required");
+                return;
+            }
+            if (!password) {
+                setPasswordError(t("auth:login.passwordRequired") ?? "Password required");
+                setError(t("auth:login.passwordRequired") ?? "Password required");
+                return;
+            }
+        }
+
+        // validate format using zod schema (email regex + password length)
+        const parsed = loginSchema.safeParse({ email, password });
+        if (!parsed.success) {
+            setIsSubmitting(false);
+            const issues = parsed.error.formErrors.fieldErrors;
+            if (issues.email && issues.email.length) setEmailError(t("auth:login.invalidEmail") ?? issues.email[0]);
+            if (issues.password && issues.password.length) setPasswordError(t("auth:login.passwordMin") ?? issues.password[0]);
+            setError(t("auth:login.fixFields") ?? "Please fix the highlighted fields and try again");
+            return;
+        }
         try {
             await login({ email, password });
             router.replace("/");
@@ -150,7 +187,10 @@ export default function LoginPage() {
                                 <form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
                                     {error && <p className="text-sm text-destructive">{error}</p>}
                                     <div className="space-y-2">
-                                        <Label htmlFor="email">{t("auth:login.email")}</Label>
+                                        <Label htmlFor="email" className="inline-flex items-center gap-1">
+                                            {t("auth:login.email")}
+                                            <span className="text-rose-500 font-extrabold drop-shadow ml-1">*</span>
+                                        </Label>
                                         <Input
                                             id="email"
                                             type="email"
@@ -159,9 +199,13 @@ export default function LoginPage() {
                                             onChange={(e) => setEmail(e.target.value)}
                                             required
                                         />
+                                        {emailError && <p className="text-sm text-destructive">{emailError}</p>}
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="password">{t("auth:login.password")}</Label>
+                                        <Label htmlFor="password" className="inline-flex items-center gap-1">
+                                            {t("auth:login.password")}
+                                            <span className="text-rose-500 font-extrabold drop-shadow ml-1">*</span>
+                                        </Label>
                                         <Input
                                             id="password"
                                             type="password"
@@ -170,6 +214,7 @@ export default function LoginPage() {
                                             onChange={(e) => setPassword(e.target.value)}
                                             required
                                         />
+                                        {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
                                     </div>
                                     <Button type="submit" className="w-full" disabled={isSubmitting}>
                                         {isSubmitting ? t("auth:login.signingIn") : t("auth:login.submit")}
