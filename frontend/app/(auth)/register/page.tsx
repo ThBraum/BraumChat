@@ -25,6 +25,7 @@ export default function RegisterPage() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -49,6 +50,21 @@ export default function RegisterPage() {
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         setIsSubmitting(true);
+        setSuccess(null);
+
+        if (!displayName?.trim() || !email?.trim() || !password || !confirmPassword) {
+            setError(t("auth:register.requiredFields") ?? "All fields are required");
+            setIsSubmitting(false);
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setError(t("auth:register.invalidEmail") ?? "Invalid email format");
+            setIsSubmitting(false);
+            return;
+        }
+
         if (password !== confirmPassword) {
             setError(t("auth:register.passwordMismatch") ?? "Passwords do not match");
             setIsSubmitting(false);
@@ -61,7 +77,9 @@ export default function RegisterPage() {
                 password,
                 display_name: displayName,
             });
+            setSuccess(t("auth:register.success") ?? "Account created! Redirecting...");
             setConfirmPassword("");
+            router.push("/");
         } catch (err) {
             setError((err as Error)?.message ?? t("auth:login.error") ?? "Register failed");
         } finally {
@@ -163,8 +181,12 @@ export default function RegisterPage() {
                             <CardContent>
                                 <form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
                                     {error && <p className="text-sm text-destructive">{error}</p>}
+                                    {success && <div className="text-sm text-emerald-400 font-semibold">{success}</div>}
                                     <div className="space-y-2">
-                                        <Label htmlFor="displayName">{t("auth:register.displayName")}</Label>
+                                        <Label htmlFor="displayName" className="inline-flex items-center gap-1">
+                                            {t("auth:register.displayName")}
+                                            <span className="text-rose-500 font-extrabold drop-shadow ml-1">*</span>
+                                        </Label>
                                         <Input
                                             id="displayName"
                                             value={displayName}
@@ -173,7 +195,10 @@ export default function RegisterPage() {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="email">{t("auth:login.email")}</Label>
+                                        <Label htmlFor="email" className="inline-flex items-center gap-1">
+                                            {t("auth:login.email")}
+                                            <span className="text-rose-500 font-extrabold drop-shadow ml-1">*</span>
+                                        </Label>
                                         <Input
                                             id="email"
                                             type="email"
@@ -184,7 +209,10 @@ export default function RegisterPage() {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="password">{t("auth:login.password")}</Label>
+                                        <Label htmlFor="password" className="inline-flex items-center gap-1">
+                                            {t("auth:login.password")}
+                                            <span className="text-rose-500 font-extrabold drop-shadow ml-1">*</span>
+                                        </Label>
                                         <div className="relative">
                                             <Input
                                                 id="password"
@@ -206,7 +234,10 @@ export default function RegisterPage() {
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="confirmPassword">{t("auth:register.confirmPassword")}</Label>
+                                        <Label htmlFor="confirmPassword" className="inline-flex items-center gap-1">
+                                            {t("auth:register.confirmPassword")}
+                                            <span className="text-rose-500 font-extrabold drop-shadow ml-1">*</span>
+                                        </Label>
                                         <div className="relative">
                                             <Input
                                                 id="confirmPassword"

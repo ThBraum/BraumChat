@@ -186,8 +186,12 @@ export const AuthProvider = ({
     const login = useCallback(
         async (payload: { email: string; password: string }) => {
             const form = new URLSearchParams();
+            form.set("grant_type", "password");
             form.set("username", payload.email);
             form.set("password", payload.password);
+            form.set("scope", "");
+            form.set("client_id", "");
+            form.set("client_secret", "");
 
             const response = await fetch(buildUrl("/auth/login"), {
                 method: "POST",

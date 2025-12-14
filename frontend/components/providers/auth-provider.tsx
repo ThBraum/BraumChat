@@ -185,13 +185,23 @@ export const AuthProvider = ({
 
     const login = useCallback(
         async (payload: { email: string; password: string }) => {
+            const form = new URLSearchParams();
+            // FastAPI OAuth2PasswordRequestForm expects form fields: username/password (+ optional OAuth2 fields)
+            form.set("grant_type", "password");
+            form.set("username", payload.email);
+            form.set("password", payload.password);
+            form.set("scope", "");
+            form.set("client_id", "");
+            form.set("client_secret", "");
+
             const response = await fetch(buildUrl("/auth/login"), {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: form.toString(),
             });
             if (!response.ok) {
-                throw new Error("Invalid credentials");
+                const message = await response.text();
+                throw new Error(message || "Invalid credentials");
             }
             const tokens = (await response.json()) as AuthTokens;
             setTokens(tokens);
