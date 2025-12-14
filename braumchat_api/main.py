@@ -35,6 +35,14 @@ def create_app() -> FastAPI:
     # WebSocket endpoints
     app.include_router(realtime_router.router)
 
+    @app.get("/health", tags=["health"])
+    async def health():
+        return {"status": "ok"}
+
+    @app.get("/heath", tags=["health"])
+    async def heath():
+        return {"status": "ok"}
+
     return app
 
 
