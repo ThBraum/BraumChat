@@ -111,25 +111,35 @@ if not db_url:
 
 engine = create_engine(db_url, future=True)
 with engine.begin() as conn:
-    # adiciona users.username se estiver faltando
-    col_exists = conn.execute(
+    users_exists = conn.execute(
         text(
             """
             SELECT 1
-            FROM information_schema.columns
-            WHERE table_schema='public' AND table_name='users' AND column_name='username'
+            FROM information_schema.tables
+            WHERE table_schema='public' AND table_name='users'
             """
         )
     ).first()
-    if not col_exists:
-        # coluna nullable; a app exige no request, mas DB tolera NULL para dados antigos
-        conn.execute(text("ALTER TABLE users ADD COLUMN username VARCHAR(32)"))
-        # unique simples (create_user salva lower())
-        conn.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_username ON users (username)"))
-        conn.execute(text("CREATE INDEX IF NOT EXISTS ix_users_username_lookup ON users (lower(username))"))
-        print('Reparo aplicado: users.username + indices')
+
+    if not users_exists:
+        print('Reparo pulado: tabela users ainda nao existe')
     else:
-        print('Reparo nao necessario: users.username ja existe')
+        col_exists = conn.execute(
+            text(
+                """
+                SELECT 1
+                FROM information_schema.columns
+                WHERE table_schema='public' AND table_name='users' AND column_name='username'
+                """
+            )
+        ).first()
+        if not col_exists:
+            conn.execute(text("ALTER TABLE users ADD COLUMN username VARCHAR(32)"))
+            conn.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_username ON users (username)"))
+            conn.execute(text("CREATE INDEX IF NOT EXISTS ix_users_username_lookup ON users (lower(username))"))
+            print('Reparo aplicado: users.username + indices')
+        else:
+            print('Reparo nao necessario: users.username ja existe')
 PY
 
     baseline_info=$(python - <<'PY'
