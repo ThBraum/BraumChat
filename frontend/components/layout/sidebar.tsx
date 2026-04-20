@@ -270,7 +270,7 @@ export const Sidebar = ({ workspaces }: SidebarProps) => {
 
     const channelsQuery = useQuery<Channel[]>({
         queryKey: queryKeys.channels(activeWorkspaceId ?? undefined),
-        queryFn: () => apiFetch(`/workspaces/${activeWorkspaceId}/channels`),
+        queryFn: () => apiFetch(`/channels/workspaces/${activeWorkspaceId}/channels`),
         enabled: !!activeWorkspaceId,
     });
 
@@ -294,7 +294,7 @@ export const Sidebar = ({ workspaces }: SidebarProps) => {
 
     const createChannelMutation = useMutation({
         mutationFn: async (name: string) => {
-            return apiFetch(`/workspaces/${activeWorkspaceId}/channels`, {
+            return apiFetch(`/channels/workspaces/${activeWorkspaceId}/channels`, {
                 method: "POST",
                 body: JSON.stringify({ name }),
             });

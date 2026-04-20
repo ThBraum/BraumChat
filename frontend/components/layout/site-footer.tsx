@@ -17,7 +17,7 @@ export const SiteFooter = ({ className }: SiteFooterProps) => (
     )}
   >
     <span className="font-medium tracking-wide text-foreground/80">
-      © 2025 Matheus Braum.
+      © {new Date().getFullYear()} Matheus Braum.
     </span>
     <div className="flex items-center gap-3 text-foreground/70">
       <Link
